@@ -21,16 +21,51 @@ The technology stack for zkUSD Vala is anchored by zkSNARK for privacy preservat
 
 ### 4.1 Infrastructure
 
-### 4.2 Proof of ULI (Unspent Leaf Index)
+The users' fungible assets are hashed into in a Binary Merkle Tree. The leaf node is initialized with a constant value until any asset occupies the slot of the leaf, then the leaf node should be updated to $H_i=\mathrm{Hash}(tag_i \ | \ amount)$, where $i$ is the leaf node index, $amount$ is the quantity of assets stored at that leaf node, and $tag_i = \mathrm{Hash}(i \ | \ secret)$, with $secret$ being the key of the user who owns the assets.
 
+Let the latest available leaf index is $i$. The user can deposit an asset into the pool while providing the asset and the $tag_i$, then computes the leaf hash and updates the Merkle Tree. For withdrawal, the user provides the withawal amount, $tag_i$ and snark proof.
 
+![merkletree](./merkletree.svg)
+
+### 4.2 Proof of ULO (Unspent Leaf Output)
+
+The design of the withdrawal mechanism is influenced by the Bitcoin UTXO (Unspent Transaction Output) model, which we've adapted into what we call the Unspent Leaf Output (ULO). Users select a set of indexes that represent their own assets to use as inputs. They then hash the remaining balance into a new available leaf node as output. The difference between the total input and the output is the amount the user withdraws.
+
+For an Unspent Leaf Output (ULO) with index (i), we must first verify its existence and then calculate the corresponding leaf's nullifier within the circuit as follows:
+
+$$
+\begin{aligned}
+tag_i&=\mathrm{Hash}(i \ | \ secret)
+\\
+nullifier_i&=\mathrm{Hash}(secret \ | \ i)
+\\
+leaf_i&=\mathrm{Hash}(tag_i \ | \ amount_i)
+\\
+root&=\mathrm{MerklePath}(leaf_i, \ elements)
+\end{aligned}
+$$
+
+Next, we need to demonstrate that the total input amount is equal to the total output amount within the circuit. This is represented by the following equations:
+
+$$
+\begin{aligned}
+\sum_{i\in\{\}}amount_i&=withdrawal + amount_k
+\\
+tag_k&=\mathrm{Hash}(k \ | \ secret)
+\\
+leaf_k&=\mathrm{Hash}(tag_k \ | \ amount_k)
+\end{aligned}
+$$
+
+Note: in above process, we set $k$, $nullifier$, $leaf_k$, and $root$ as public variables of the circuits, where k is the lastest available leaf index.
 
 ### 4.3 Proof of membership
 
+TODO
 
 ### 4.3.1 Performance Comparision
 
-
+TODO
 
 ## 5. ASP Part @Xxiang
 
