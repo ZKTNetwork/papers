@@ -61,9 +61,74 @@ Note: in above process, we set $k$, $nullifier$, $leaf_k$, and $root$ as public 
 
 ### 4.3 Proof of membership
 
-TODO
+#### 4.3.1 Why not merkle proof
 
-### 4.3.1 Performance Comparision
+Proof of membership in zkUSD lies in demonstrating that an input comes from an arbitrary set constructed by user, meanwhile ensuring that this set is publicly available to anyone. Typically, the approach is to organize the set into a new Merkle Tree and prove that the input is also a leaf node of that Merkle Tree (Indeed, privacy-focused solutions like Tornado Cash v2 have adopted this kind of design).
+
+However, if the set is too small, the user's privacy is compromised, else the set is too large, generating the corresponding merkle tree incurs a huge gas cost on blockchain, since ZK-friendly hash (Poseidon, Rescue) are not integrated by EVM primitively, while creating merkle tree has a hash complexity of O(n).
+
+We hereby adopt the Plookup to construct proof of membership, instead of Merkle Tree. Let’s take a look at the design idea of Plookup:
+
+*"we precompute a lookup table of the legitimate (input, output) combinations; and the prover argues the witness values exist in this table."*
+
+#### 4.3.2 Plookup implementation
+
+Assuming the user provides a number of source ULOs, denoted as $m$, and we denote this set as $t$, you would pad the set $t$ with zeros until it satisfies the number of elements in the subgroup. This padding ensures that the set size matches the required size for the plookup permutation.
+
+$$
+t=\{i,j,...,0,...,0\}
+$$
+
+$f$ is the query table:
+
+$$
+f_i =
+\left\{\begin{matrix}
+c_i, &\ \mathrm{if \ the} \ i\mathrm{\ gate \ is \ a \ lookup \ gate}
+\\
+t_n, &\ \mathrm{otherwise}
+\end{matrix}\right.
+$$
+
+Permutation polynomial is defined as
+
+$$
+\begin{aligned}
+z_2(X)=&(d_2X^2+d_1X+d_0)Z_H(X)+L_1(X)
+\\
+&+\sum_{i=1}^{n-1}\left(L_{i+1}(X)\prod_{j=1}^{i}\frac{(1+\delta)(\varepsilon+f_j)(\varepsilon(1+\delta)+t_j+\delta t_{j+1})}{(\varepsilon(1+\delta)+s_{2j-1}+\delta s_{2j})(\varepsilon(1+\delta)+s_{2j}+\delta s_{2j+1})}\right)
+\end{aligned}
+$$
+
+Extend the quotient polynomial of Plonk, this is similar to the Plonkup zk-snark:
+
+$$
+q(X)=\frac{1}{Z_H(X)}
+\left(
+\begin{aligned}
+&a(X)b(X)q_M(X)+q(X)q_L(X)+b(X)q_R(X)+c(X)q_O(X)+q_C(X)+\mathrm{PI}(X)
+\\
+&+ \ ... \ ...
+\\
+&+q_K(X)(c(X)-f(X))\alpha^3
+\\
+&+z_2(X)(1+\delta)(\varepsilon+f(X))(\varepsilon(1+\delta)+t(X)+\delta t(\omega X))\alpha^4
+\\
+&-z_2(\omega X)(\varepsilon(1+\delta)+h_1(X)+\delta h_2(X))(\varepsilon(1+\delta)+h_2(X)+\delta h_1(\omega X))\alpha^4
+\\
+&+(z_2(X)-1)L_1(X)\alpha^5
+\\
+&+q_T(X)t(X)\alpha^6
+\end{aligned}
+\right)
+$$
+
+Where the selector $q_K(X)$ switches on/off the lookup gate, $q_T(X)$ controls the padding elements should be all 0.
+
+During the verification phase, in addition to the zk-SNARK proof verification, we just need to verify the opening proof of $t(X)$ at $\{\omega, \omega^2, ..., \omega^m\}$, without any hash operations on EVM.
+**Note**: Actually we need to construct an aggregated opening proof, which is called multi-point opening and use only one elliptic curve pairing operation.
+
+### 4.3.3 Performance Comparision
 
 TODO
 
