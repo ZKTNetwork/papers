@@ -14,23 +14,128 @@ Central to Vala's architecture is the Privacy Pool, a sophisticated mechanism th
 
 ## 3. Technology Stack
 
-The technology stack for zkUSD Vala is anchored by zkSNARK for privacy preservation. The UTXO Proof uses a Merkle Tree structure, while Membership Proof employs Plonk + Plookup[1] for enhanced search speed. The project's zero-knowledge proofs part are implemented in Rust, optimizing performance and security. For the frontend, proof generation utilizes WebAssembly  compiled from our Rust code, significantly accelerating the proof generation process for users. This stack represents a blend of advanced cryptographic techniques and efficient programming solutions, tailored for robust and fast privacy transactions.
+The technology stack for zkUSD Vala is anchored by zkSNARK for privacy preservation. The UTXO Proof uses a Merkle Tree structure, while Membership Proof employs Plonk + Plookup[^1][^2] for enhanced search speed. The project's zero-knowledge proofs part are implemented in Rust, optimizing performance and security. For the frontend, proof generation utilizes WebAssembly  compiled from our Rust code, significantly accelerating the proof generation process for users. This stack represents a blend of advanced cryptographic techniques and efficient programming solutions, tailored for robust and fast privacy transactions.
 
 
 ## 4. Component Details
 
 ### 4.1 Infrastructure
 
-### 4.2 Proof of ULI (Unspent Leaf Index)
+The users' fungible assets are hashed into in a Binary Merkle Tree. The leaf node is initialized with a constant value $H'=\mathrm{Hash}(0)$ until any asset occupies the slot of the leaf, then the leaf node should be updated to $H_i=\mathrm{Hash}(amount \ | \ commitment_i)$, where $i$ is the leaf node index, $amount$ is the quantity of assets stored at that leaf node, and $commitment_i = \mathrm{Hash}(secret_i)$, with $secret_i$ being the key of the user who owns the asset of index $i$.
 
+For an unused leaf index $i$, the user can deposit an asset into the pool while providing the asset and commitment. For withdrawal, the user should provide the withdrawal amount, new leaf hash and the snark proof.
 
+![merkletree](./merkletree.svg)
+
+### 4.2 Proof of ULO (Unspent Leaf Output)
+
+The design of the withdrawal mechanism is influenced by the Bitcoin UTXO (Unspent Transaction Output) model, which we've adapted into what we call ULO (Unspent Leaf Output). Users select a set of indexes that indicate positions of their own assets to use as inputs, then hash the remaining balance into a new leaf node as output. The difference between the total input and the output is the amount of the withdrawal.
+
+Now let the ULO source list is $L$, for each ULO with index $i\in L$, we must first verify its existence and then calculate the corresponding leaf's nullifier within the circuit as follows:
+
+$$
+\begin{aligned}
+commitment_i&=\mathrm{Hash}(secret_i)
+\\
+nullifier_i&=\mathrm{Hash}(secret_i^{-1})
+\\
+leaf_i&=\mathrm{Hash}(amount_i \ | \ commitment_i)
+\\
+root&=\mathrm{MerklePath}(leaf_i, \ elements)
+\end{aligned}
+$$
+
+Next, we need to demonstrate that the total input amount is equal to the total output amount within the circuit, then generate the leaf output. This is represented by the following equations:
+
+$$
+\begin{aligned}
+\sum_{i\in L}amount_i&=amount_w + amount_o
+\\
+commitment&=\mathrm{Hash}(secret)
+\\
+leaf&=\mathrm{Hash}(amount_o \ | \ commitment)
+\end{aligned}
+$$
+
+Where $amount_w$ is the withdraw amount, $amount_o$ is the output amount.
+
+**Note**: in above process, we set $\{nullifier_i\}_{i\in L}$, $leaf$, $root$ and $amount_w$ as public variables from the circuits.
 
 ### 4.3 Proof of membership
 
+#### 4.3.1 Why not merkle proof
 
-### 4.3.1 Performance Comparision
+Proof of membership in zkUSD lies in demonstrating that the inputs come from an arbitrary set constructed by user, meanwhile ensuring that this set is publicly available to anyone. Typically, the set can be organized into a new Merkle Tree and user should prove that each input is also a leaf node of the Merkle Tree (Indeed, privacy-focused solutions like Tornado Cash v2 have adopted this kind of design).
 
+However, if the set is too small, the user's privacy is compromised. If the set is too large, generating the corresponding merkle tree incurs a huge gas cost on blockchain, since ZK-friendly hash functions (Poseidon, Rescue) are not integrated by EVM primitively, while creating merkle tree has a complexity of O(n) hash.
 
+We hereby adopt the Plookup to construct proof of membership, instead of Merkle Tree. Let’s take a look at the design idea of Plookup:
+
+*"we precompute a lookup table of the legitimate (input, output) combinations; and the prover argues the witness values exist in this table."*
+
+#### 4.3.2 Plookup implementation
+
+Assuming the user provides a leaf index list of size $m$ from the source ULOs, denoted as $t$, then we pad the set $t$ with 0 until it satisfies the size of circuit size $n$.
+
+$$
+t=\{1834,25536,...,0,...,0\}
+$$
+
+Let $f$ be the query table:
+
+$$
+f_i =
+\left\{\begin{matrix}
+c_i, &\ \mathrm{if \ the} \ i\mathrm{\ gate \ is \ a \ lookup \ gate}
+\\
+0, &\ \mathrm{otherwise}
+\end{matrix}\right.
+$$
+
+Permutation polynomial is defined as
+
+$$
+\begin{aligned}
+z_2(X)=&(d_2X^2+d_1X+d_0)Z_H(X)+L_1(X)
+\\
+&+\sum_{i=1}^{n-1}\left(L_{i+1}(X)\prod_{j=1}^{i}\frac{(1+\delta)(\varepsilon+f_j)(\varepsilon(1+\delta)+t_j+\delta t_{j+1})}{(\varepsilon(1+\delta)+s_{2j-1}+\delta s_{2j})(\varepsilon(1+\delta)+s_{2j}+\delta s_{2j+1})}\right)
+\end{aligned}
+$$
+
+Extend the quotient polynomial of Plonk, this is similar to the Plonkup zk-snark:
+
+$$
+q(X)=\frac{1}{Z_H(X)}
+\left(
+\begin{aligned}
+&a(X)b(X)q_M(X)+q(X)q_L(X)+b(X)q_R(X)+c(X)q_O(X)+q_C(X)+\mathrm{PI}(X)
+\\
+&+ \ ... \ ...
+\\
+&+q_K(X)(c(X)-f(X))\alpha^3
+\\
+&+z_2(X)(1+\delta)(\varepsilon+f(X))(\varepsilon(1+\delta)+t(X)+\delta t(\omega X))\alpha^4
+\\
+&-z_2(\omega X)(\varepsilon(1+\delta)+h_1(X)+\delta h_2(X))(\varepsilon(1+\delta)+h_2(X)+\delta h_1(\omega X))\alpha^4
+\\
+&+(z_2(X)-1)L_1(X)\alpha^5
+\\
+&+q_T(X)t(X)\alpha^6
+\end{aligned}
+\right)
+$$
+
+Where the selector $q_K(X)$ switches on/off the lookup gate, $q_T(X)$ controls the padding elements should be all 0.
+
+During the verification phase, in addition to the zk-SNARK proof verification, we just need to verify the opening proof of $t(X)$ at $\{\omega, \omega^2, ..., \omega^m\}$, without any hash operations on EVM.
+
+**Note**: 
+- Actually we need to construct an aggregated opening proof, which is called multi-point opening and use only one elliptic curve pairing operation.
+- To represent set of ULOs, we use index list instead of leaf hash list, since index number takes a 64-bit range while hash number takes a 256-bit range, which saves a lot of gas.
+
+### 4.3.3 Performance Comparision
+
+TODO
 
 ## 5. ASP Part @Xxiang
 
@@ -41,4 +146,5 @@ association set providers(ASPs).
 
 ## References
 
-1. plookup: A simplified polynomial protocol for lookup tables https://eprint.iacr.org/2020/315.pdf
+[^1]:[plookup: A simplified polynomial protocol for lookup tables](https://eprint.iacr.org/2020/315.pdf)
+[^2]:[plonkup: PlonKup: Reconciling PlonK with plookup](https://eprint.iacr.org/2022/086)
