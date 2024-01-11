@@ -83,7 +83,7 @@ There are **2** main advantages of Plookup in our membership proof.
 Assuming the user provides an identifier list of size $m$ from the source ULOs, denoted as $t$, then we pad the set $t$ with 0 until it satisfies the size of circuit size $n$.
 
 $$
-t=\{id_0,id_1,...,0,...,0\}
+t=\{id_0,id_1,..,0,..,0\}
 $$
 
 Let $f$ be the query table:
@@ -134,7 +134,7 @@ $$
 
 Where the selector $q_K(X)$ switches on/off the lookup gate, $q_T(X)$ controls the padding elements should be all 0.
 
-During the verification phase, in addition to the zk-SNARK proof verification, we just need to verify the opening proof of $t(X)$ at $\{\omega, \omega^2, ..., \omega^m\}$, without any hash operations on EVM.
+During the verification phase, in addition to the zk-SNARK proof verification, we just need to verify the opening proof of $t(X)$ at $\{\omega, \omega^2, .., \omega^m\}$, without any hash operations on EVM.
 
 **Note**: 
 We need to construct an aggregated opening proof, which is called a multi-point opening, and use only one elliptic curve pairing operation.
@@ -147,7 +147,7 @@ TODO
 
 The Associate Set Provider (ASP) mechanism allows a third party to oversee the membership list. Similar to an attestor, an ASP offers attestation services for end-users. The associated address, along with potential attested and sealed data, is submitted to a designated ASP smart contract. In Vala, any entity can register as an ASP. The selection of which ASP to utilize depends on the choices made by end-users and Dapps.
 
-The data category can be defined by the ASP, allowing support for a diverse range of potential data from web2, such as credit scores, KYC results, etc. For attesting any data obtained through the standard Transport Layer Security (TLS) protocol (e.g., HTTPS) and to accommodate a large volume of potential data, we recommend employing MPC-TLS style algorithms within the ASP. This approach, initially introduced by DECO and significantly improved by PADO, is detailed further in this paper(https://eprint.iacr.org/2023/964.pdf). Within this framework, users can prove to the attestor that the data indeed originates from the intended sources without leaking any other information.
+The data category can be defined by the ASP, allowing support for a diverse range of potential data from web2, such as credit scores, KYC results, etc. For attesting any data obtained through the standard Transport Layer Security (TLS) protocol (e.g, HTTPS) and to accommodate a large volume of potential data, we recommend employing MPC-TLS style algorithms within the ASP. This approach, initially introduced by DECO and significantly improved by PADO, is detailed further in this paper(https://eprint.iacr.org/2023/964.pdf)[^3]. Within this framework, users can prove to the attestor that the data indeed originates from the intended sources without leaking any other information.
 
 We list the basic workflow in the following figure.
 
@@ -160,7 +160,6 @@ The inclusion of data in the membership list is discretionary. This flexibility 
 ## 6. Client-Side Acceleration Solution
 
 
-## References
-
-[^1]:[plookup: A simplified polynomial protocol for lookup tables](https://eprint.iacr.org/2020/315.pdf)
-[^2]:[plonkup: PlonKup: Reconciling PlonK with plookup](https://eprint.iacr.org/2022/086)
+[^1]:[Luke Pearson, Joshua Fitzgerald, Héctor Masip, Marta Bellés-Muñoz & Jose Luis Muñoz-Tapia, (2022). "plookup: A simplified polynomial protocol for lookup tables"](https://eprint.iacr.org/2020/315.pdf)
+[^2]:[Ariel Gabizon, Zachary J. Williamson. (2020). "plonkup: PlonKup: Reconciling PlonK with plookup"](https://eprint.iacr.org/2022/086)
+[^3]:[Xiang Xie, Kang Yang, Xiao Wang, Yu Yu. (2023). "Lightweight Authentication of Web Data via Garble-Then-Prove."](https://eprint.iacr.org/2023/964.pdf)
