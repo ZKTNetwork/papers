@@ -1,8 +1,10 @@
 # Advancing Blockchain Transaction Privacy and Compliance: Insights into Innovative Engineering Practices
 
+Authors: Lone(zkUSD), Taiyo(zkUSD), Xie. X(PADO Labs)
+
 ## 1. Introduction
 
-Blockchain privacy and regulatory compliance, a dynamic shift is underway, inspired by the pivotal works of Vitalik Buterin and [Ameen Soleimani](https://ethresear.ch/u/ameensol). Their paper, "[Blockchain Privacy and Regulatory Compliance: Towards a Practical Equilibrium](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4563364)," alongside the insightful [forum post](https://ethresear.ch/t/permissioned-privacy-pools/13572) on permissioned privacy pools, paves the way for a nuanced understanding of the delicate balance between maintaining transactional privacy and adhering to regulatory norms. These resources offer a profound exploration of the challenges and potential solutions in harmonizing privacy with compliance in the evolving blockchain landscape.
+Blockchain privacy and regulatory compliance, a dynamic shift is underway, inspired by the pivotal works of Vitalik Buterin and [Ameen Soleimani](https://ethresear.ch/u/ameensol). Their paper, "[Blockchain Privacy and Regulatory Compliance: Towards a Practical Equilibrium](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4563364)[^1]," alongside the insightful [forum post](https://ethresear.ch/t/permissioned-privacy-pools/13572) on permissioned privacy pools, paves the way for a nuanced understanding of the delicate balance between maintaining transactional privacy and adhering to regulatory norms. These resources offer a profound exploration of the challenges and potential solutions in harmonizing privacy with compliance in the evolving blockchain landscape.
 
 ## 2. System Architecture
 
@@ -14,7 +16,7 @@ Central to Vala's architecture is the Privacy Pool, a sophisticated mechanism th
 
 ## 3. Technology Stack
 
-The technology stack for zkUSD Vala is anchored by zkSNARK for privacy preservation. The UTXO Proof uses a Merkle Tree structure, while Membership Proof employs Plonk + Plookup[^1] for enhanced search speed. The project's zero-knowledge proofs part is implemented in Rust, optimizing performance and security. For the frontend, proof generation utilizes WebAssembly compiled from our Rust code, significantly accelerating the proof generation process for users. This stack represents a blend of advanced cryptographic techniques and efficient programming solutions, tailored for robust and fast privacy transactions.
+The technology stack for zkUSD Vala is anchored by zkSNARK for privacy preservation. The UTXO Proof uses a Merkle Tree structure, while Membership Proof employs Plonk + Plookup[^2] for enhanced search speed. The project's zero-knowledge proofs part is implemented in Rust, optimizing performance and security. For the frontend, proof generation utilizes WebAssembly compiled from our Rust code, significantly accelerating the proof generation process for users. This stack represents a blend of advanced cryptographic techniques and efficient programming solutions, tailored for robust and fast privacy transactions.
 
 
 ## 4. Component Details
@@ -75,10 +77,28 @@ We hereby adopt the Plookup to construct proof of membership, instead of Merkle 
 *"we precompute a lookup table of the legitimate (input, output) combinations; and the prover argues the witness values exist in this table."*
 
 There are **2** main advantages of Plookup in our membership proof.
-- In the proving phase, we do not need to perform existence proofs for each ULO, which significantly reduces the circuit size.
+- In the proving phase, we do not need to perform existence proofs for each ULO, which significantly reduces the circuit size. 
 - In the verification phase, we do not need to perform hash operations in EVM. Only one elliptic curve pairing is required.
 
-#### 4.3.2 Plookup implementation
+#### 4.3.2 Advantages of Plookup
+##### 1. Constant Complexity in Circuit Size
+
+Traditionally, Merkle proof methods, when handling a large number of ULO proofs, lead to linear growth in circuit size due to the need for individual existence proofs for each ULO. This results in increased computational complexity and time costs. However, a key advantage of using Plookup in our UTXO model is that it maintains a constant level of complexity in circuit size. Regardless of the number of ULOs to be verified, Plookup can process them within a constant circuit size, significantly reducing the overall circuit size and processing time.
+
+#####  2. Efficiency in the Verification Process
+
+Another advantage of Plookup in the verification phase is the elimination of the need for extensive hash operations in the Ethereum Virtual Machine (EVM). In contrast, traditional Merkle proofs require hashing at each node during verification, which is not only time-consuming but also computationally costly. Plookup simplifies the verification process by using a single elliptic curve pairing operation to ascertain the existence of ULOs. This approach not only speeds up the verification but is also more efficient in conserving computational resources.
+
+
+##### Application of Plookup in the UTXO Model
+
+In our UTXO model, each user's funds are represented as multiple encrypted ULOs, each indicating a specific amount of assets. With Plookup, we can effectively process and verify these ULOs irrespective of their quantity. This method enhances the scalability and efficiency of the entire system, particularly in handling a large volume of transactions and complex fund movements.
+
+In summary, Plookup provides significant benefits in our membership proof system, especially in managing numerous ULOs within the UTXO model. This approach not only reduces computational burden but also enhances the overall system efficiency and performance.
+
+
+
+#### 4.3.3 Plookup implementation
 
 Assuming the user provides an identifier list of size $m$ from the source ULOs, denoted as $t$, then we pad the set $t$ with 0 until it satisfies the size of circuit size $n$.
 
@@ -109,7 +129,7 @@ z_2(X)=&(d_2X^2+d_1X+d_0)Z_H(X)+L_1(X)
 \end{aligned}
 $$
 
-Extend the quotient polynomial of Plonk, which is similar to the Plonkup zk-snark[^2]:
+Extend the quotient polynomial of Plonk, which is similar to the Plonkup zk-snark[^3]:
 
 $$
 q(X)=\frac{1}{Z_H(X)}
@@ -139,7 +159,7 @@ During the verification phase, in addition to the zk-SNARK proof verification, w
 **Note**: 
 We need to construct an aggregated opening proof, which is called a multi-point opening, and use only one elliptic curve pairing operation.
 
-### 4.3.3 Performance Comparision
+### 4.3.4 Performance Comparision
 
 TODO
 
@@ -147,7 +167,7 @@ TODO
 
 The Associate Set Provider (ASP) mechanism allows a third party to oversee the membership list. Similar to an attestor, an ASP offers attestation services for end-users. The associated address, along with potential attested and sealed data, is submitted to a designated ASP smart contract. In Vala, any entity can register as an ASP. The selection of which ASP to utilize depends on the choices made by end-users and Dapps.
 
-The data category can be defined by the ASP, allowing support for a diverse range of potential data from web2, such as credit scores, KYC results, etc. For attesting any data obtained through the standard Transport Layer Security (TLS) protocol (e.g, HTTPS) and to accommodate a large volume of potential data, we recommend employing MPC-TLS style algorithms within the ASP. This approach, initially introduced by DECO and significantly improved by PADO, is detailed further in this paper[https://eprint.iacr.org/2023/964.pdf](https://eprint.iacr.org/2023/964.pdf)[^3]. Within this framework, users can prove to the attestor that the data indeed originates from the intended sources without leaking any other information.
+The data category can be defined by the ASP, allowing support for a diverse range of potential data from web2, such as credit scores, KYC results, etc. For attesting any data obtained through the standard Transport Layer Security (TLS) protocol (e.g, HTTPS) and to accommodate a large volume of potential data, we recommend employing MPC-TLS style algorithms within the ASP. This approach, initially introduced by DECO and significantly improved by PADO, is detailed further in this paper[https://eprint.iacr.org/2023/964.pdf](https://eprint.iacr.org/2023/964.pdf) [^4]. Within this framework, users can prove to the attestor that the data indeed originates from the intended sources without leaking any other information.
 
 We list the basic workflow in the following figure.
 
@@ -159,7 +179,35 @@ The inclusion of data in the membership list is discretionary. This flexibility 
 
 ## 6. Client-Side Acceleration Solution
 
+In our quest to enhance user experience and efficiency in the Vala system, we've focused on client-side computational optimization. This optimization is crucial for reducing the computational burden on user devices and accelerating transaction and verification processes.
 
-[^1]:[Luke Pearson, Joshua Fitzgerald, Héctor Masip, Marta Bellés-Muñoz & Jose Luis Muñoz-Tapia, (2022). "plookup: A simplified polynomial protocol for lookup tables"](https://eprint.iacr.org/2020/315.pdf)
-[^2]:[Ariel Gabizon, Zachary J. Williamson. (2020). "plonkup: PlonKup: Reconciling PlonK with plookup"](https://eprint.iacr.org/2022/086)
-[^3]:[Xiang Xie, Kang Yang, Xiao Wang, Yu Yu. (2023). "Lightweight Authentication of Web Data via Garble-Then-Prove."](https://eprint.iacr.org/2023/964.pdf)
+### 6.1 WebAssembly Integration
+Our integration of WebAssembly (Wasm) allows for the execution of complex cryptographic proof generation processes directly in the user's browser. By compiling our Rust code into WebAssembly, we've significantly reduced dependency on centralized servers and improved system responsiveness and efficiency.
+
+### 6.2 Local Computation Optimization
+#### 6.2.1 Transaction Decision Logic
+
+In our UTXO model, each user's funds are represented as encrypted NOTES, each corresponding to a specific amount of assets (e.g., ETH). Our system intelligently selects the appropriate combination of NOTES to fulfill withdrawal requests. For instance, if a user has NOTES of 1 ETH, 1 ETH, 2 ETH, and 3 ETH and wishes to withdraw 2.5 ETH, our system automatically utilizes the 1 ETH, 1 ETH, and 2 ETH NOTES.
+
+#### 6.2.2 Generation of New Deposit Proofs
+
+Following the utilization of certain NOTES for transactions, our system generates new deposit proofs corresponding to the remaining amount. Continuing the previous example, after spending the 1 ETH, 1 ETH, and 2 ETH NOTES, a new deposit proof for 1.5 ETH is created, ensuring secure and effective management of funds post-transaction.
+
+#### 6.2.3 Implementation in Chrome Plugin and iOS App
+
+To achieve this computational optimization, we've implemented tailored strategies in our Chrome plugin and iOS app. The Chrome plugin optimizes the NOTE selection and new proof generation process, leveraging the browser's processing capabilities. In contrast, our iOS app employs multi-threading technology to accelerate these computations, taking full advantage of the high-performance capabilities of iOS devices.
+
+### 6.3 Caching Strategies
+We have implemented caching strategies to reduce redundant computations and network requests. Key data, such as parts of the Merkle Tree, are cached on the user device for quick retrieval in subsequent transactions or verifications, reducing network traffic and significantly enhancing overall system performance.
+
+### 6.4 User Experience Enhancement
+Lastly, we place a high emphasis on enhancing the user experience. This involves not only technical optimizations but also improvements in interface design. We ensure that the user interface is intuitive and the transaction process is seamless. Real-time feedback and detailed error messages enhance user trust and satisfaction.
+
+In summary, our client-side acceleration solution is a key strategy for enhancing the performance of the Vala system. Through these technological and methodological applications, we not only enhance the speed and efficiency of transactions but also optimize the user experience, making Vala a more powerful and user-friendly blockchain privacy platform.
+
+
+
+[^1]:[Vitalik Buterin, Jacob Illum, Matthias Nadler, Fabian Schär, Ameen Soleimani (2023). "Blockchain Privacy and Regulatory Compliance: Towards a Practical Equilibrium"](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4563364)
+[^2]:[Luke Pearson, Joshua Fitzgerald, Héctor Masip, Marta Bellés-Muñoz & Jose Luis Muñoz-Tapia, (2022). "plookup: A simplified polynomial protocol for lookup tables"](https://eprint.iacr.org/2020/315.pdf)
+[^3]:[Ariel Gabizon, Zachary J. Williamson. (2020). "plonkup: PlonKup: Reconciling PlonK with plookup"](https://eprint.iacr.org/2022/086)
+[^4]:[Xiang Xie, Kang Yang, Xiao Wang, Yu Yu. (2023). "Lightweight Authentication of Web Data via Garble-Then-Prove."](https://eprint.iacr.org/2023/964.pdf)
