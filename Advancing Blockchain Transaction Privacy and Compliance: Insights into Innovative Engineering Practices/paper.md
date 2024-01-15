@@ -475,8 +475,17 @@ $$
 e([f_i(x)]_1,[x]_2)\overset{?}{=}e([t(x)]_1-t_i\cdot[1]_1+\omega^{i-1}\cdot[f_i(x)]_1,[1]_2)
 $$
 
-## 6. ASP Part @Xxiang
+## 6. Associate Set Provider
 
+The Associate Set Provider (ASP) mechanism allows a third party to oversee the membership list. Similar to an attestor, an ASP offers attestation services for end-users. The associated address, along with potential attested and sealed data, is submitted to a designated ASP smart contract. In Vala, any entity can register as an ASP. The selection of which ASP to utilize depends on the choices made by end-users and Dapps.
+
+The data category can be defined by the ASP, allowing support for a diverse range of potential data from web2, such as credit scores, KYC results, etc. For attesting any data obtained through the standard Transport Layer Security (TLS) protocol (e.g, HTTPS) and to accommodate a large volume of potential data, we recommend employing MPC-TLS style algorithms within the ASP. This approach, initially introduced by DECO and significantly improved by PADO, is detailed further in this paper[https://eprint.iacr.org/2023/964.pdf](https://eprint.iacr.org/2023/964.pdf) [^4]. Within this framework, users can prove to the attestor that the data indeed originates from the intended sources without leaking any other information.
+
+We list the basic workflow in the following figure.
+
+![asp](./asp-workflow.jpeg)
+
+The inclusion of data in the membership list is discretionary. This flexibility arises from situations where the data entry might simply be binary (YES/NO). In such cases, the smart contract accepts addresses marked as YES, allowing the omission of unnecessary data entries. However, programmability can be introduced when the sealed data holds additional meanings. For instance, an ASP might attest a user's FICO score and store the encrypted score in the smart contract. Subsequently, Dapps can devise more adaptable withdrawal conditions. For example, users with higher FICO scores may be eligible to withdraw a larger quantity of tokens, whereas those with lower FICO scores might have access to only a smaller amount. This introduces a higher degree of flexibility for designing diverse applications.
 
 ## 7. Client-Side Acceleration Solution
 
