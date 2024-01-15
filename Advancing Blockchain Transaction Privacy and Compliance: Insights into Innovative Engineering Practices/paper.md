@@ -85,14 +85,13 @@ There are **2** main advantages of Plookup in our membership proof.
 - In the verification phase, we do not need to perform hash operations in EVM. Only one elliptic curve pairing is required.
 
 #### 4.3.2 Advantages of Plookup
-##### 1. Constant Complexity in Circuit Size
+##### Constant Complexity in Circuit Size
 
 Traditionally, Merkle proof methods, when handling a large number of ULO proofs, lead to linear growth in circuit size due to the need for individual existence proofs for each ULO. This results in increased computational complexity and time costs. However, a key advantage of using Plookup in our UTXO model is that it maintains a constant level of complexity in circuit size. Regardless of the number of ULOs to be verified, Plookup can process them within a constant circuit size, significantly reducing the overall circuit size and processing time.
 
-#####  2. Efficiency in the Verification Process
+##### Efficiency in the Verification Process
 
 Another advantage of Plookup in the verification phase is the elimination of the need for extensive hash operations in the Ethereum Virtual Machine (EVM). In contrast, traditional Merkle proofs require hashing at each node during verification, which is not only time-consuming but also computationally costly. Plookup simplifies the verification process by using a single elliptic curve pairing operation to ascertain the existence of ULOs. This approach not only speeds up the verification but is also more efficient in conserving computational resources.
-
 
 ##### Application of Plookup in the UTXO Model
 
@@ -100,116 +99,414 @@ In our UTXO model, each user's funds are represented as multiple encrypted ULOs,
 
 In summary, Plookup provides significant benefits in our membership proof system, especially in managing numerous ULOs within the UTXO model. This approach not only reduces computational burden but also enhances the overall system efficiency and performance.
 
+#### 4.3.3 Plookup introduce
 
-
-#### 4.3.3 Plookup implementation
-
-Assuming the user provides an identifier list of size $m$ from the source ULOs, denoted as $t$, then we pad the set $t$ with 0 until it satisfies the size of circuit size $n$.
+Assuming the user provides an identifier list of size $m$ from the source ULOs, denoted as $\mathbf{t}$, then we pad the set $\mathbf{t}$ with 0 until it satisfies the size of circuit size $n$.
 
 $$
-t=\{id_0,id_1,..,0,..,0\}
+\mathbf{t}=\{\mathrm{id}_0,\mathrm{id}_1,...,0,...,0\}
 $$
 
-Let $f$ be the query table:
+Let $\mathbf{f}$ be the query table:
 
 $$
-f_i =
-\left\{\begin{matrix}
+f_i = q_{Ki} \cdot c_i =
+\left\{
+\begin{matrix}
 c_i, &\ \mathrm{if \ the} \ i\mathrm{\ gate \ is \ a \ lookup \ gate}
 \\
 0, &\ \mathrm{otherwise}
-\end{matrix}\right.
+\end{matrix}
+\right.
 $$
 
-Where $c_i$ is the witness variable defined in the arithmetic gate of Plonk. When $c_i$ represents the identifier variable, $f_i$ equals to $c_i$.
+Where $c_i$ is the output witness defined in arithmetic gate of Plonk, we activate it when $c_i$ represents the identifier witness. $q_{Ki} \in \{0,1\}$ is the selector that switches on/off the lookup gate.
 
-Permutation polynomial is defined as
-
-$$
-\begin{aligned}
-z_2(X)=&(d_2X^2+d_1X+d_0)Z_H(X)+L_1(X)
-\\
-&+\sum_{i=1}^{n-1}\left(L_{i+1}(X)\prod_{j=1}^{i}\frac{(1+\delta)(\varepsilon+f_j)(\varepsilon(1+\delta)+t_j+\delta t_{j+1})}{(\varepsilon(1+\delta)+s_{2j-1}+\delta s_{2j})(\varepsilon(1+\delta)+s_{2j}+\delta s_{2j+1})}\right)
-\end{aligned}
-$$
-
-Extend the quotient polynomial of Plonk, which is similar to the Plonkup zk-snark[^3]:
+Furthermore, we define $\mathbf{q_T}$ to satisfy $q_{Ti}\cdot t_i = 0$:
 
 $$
-q(X)=\frac{1}{Z_H(X)}
-\left(
-\begin{aligned}
-&a(X)b(X)q_M(X)+q(X)q_L(X)+b(X)q_R(X)+c(X)q_O(X)+q_C(X)+\mathrm{PI}(X)
+q_{Ti}=
+\left\{
+\begin{matrix}
+0, &\ i \leq m
 \\
-&+ \ ... \ ...
-\\
-&+q_K(X)(c(X)-f(X))\alpha^3
-\\
-&+z_2(X)(1+\delta)(\varepsilon+f(X))(\varepsilon(1+\delta)+t(X)+\delta t(\omega X))\alpha^4
-\\
-&-z_2(\omega X)(\varepsilon(1+\delta)+h_1(X)+\delta h_2(X))(\varepsilon(1+\delta)+h_2(X)+\delta h_1(\omega X))\alpha^4
-\\
-&+(z_2(X)-1)L_1(X)\alpha^5
-\\
-&+q_T(X)t(X)\alpha^6
-\end{aligned}
-\right)
+1, &\ i > m
+\end{matrix}
+\right.
 $$
 
-Where the selector $q_K(X)$ switches on/off the lookup gate, $q_T(X)$ controls the padding elements should be all 0.
+During the verification phase, besides the zk-SNARK proof verification, we  can verify the opening proof of $\mathbf{t}$ at $\{1, \omega, \omega^2, ..., \omega^{m-1}\}$ to confirm the correctness of each identifier in $\mathbf{t}$, without any hash operations.
 
-During the verification phase, in addition to the zk-SNARK proof verification, we just need to verify the opening proof of $t(X)$ at $\{\omega, \omega^2, .., \omega^m\}$, without any hash operations on EVM.
-
-**Note**: 
-We need to construct an aggregated opening proof, which is called a multi-point opening, and use only one elliptic curve pairing operation.
+**Note**:
+We can construct an aggregated opening proof, which is called a multi-point opening, and use only one elliptic curve pairing operation.
 
 ### 4.3.4 Performance Comparision
 
 TODO
 
-## 5. Associate Set Provider
+## 5. ZKT Protocol
 
-The Associate Set Provider (ASP) mechanism allows a third party to oversee the membership list. Similar to an attestor, an ASP offers attestation services for end-users. The associated address, along with potential attested and sealed data, is submitted to a designated ASP smart contract. In Vala, any entity can register as an ASP. The selection of which ASP to utilize depends on the choices made by end-users and Dapps.
+We now describe a protocol that referred to Plonkup[^3] which is customized for ZKT Vala.
 
-The data category can be defined by the ASP, allowing support for a diverse range of potential data from web2, such as credit scores, KYC results, etc. For attesting any data obtained through the standard Transport Layer Security (TLS) protocol (e.g, HTTPS) and to accommodate a large volume of potential data, we recommend employing MPC-TLS style algorithms within the ASP. This approach, initially introduced by DECO and significantly improved by PADO, is detailed further in this paper[https://eprint.iacr.org/2023/964.pdf](https://eprint.iacr.org/2023/964.pdf) [^4]. Within this framework, users can prove to the attestor that the data indeed originates from the intended sources without leaking any other information.
+#### Common Referenced Input
 
-We list the basic workflow in the following figure.
+$$
+n,\ [1]_1,[x]_1,...,[x^{n+5}]_1,[1]_2,[x]_2,
+\\
+q_L(X)=\sum_{i=1}^{n}q_{Li}L_i(X),\ q_R(X)=\sum_{i=1}^{n}q_{Ri}L_i(X),\ q_O(X)=\sum_{i=1}^{n}q_{Li}L_i(X),
+\\
+q_C(X)=\sum_{i=1}^{n}q_{Ci}L_i(X),\ q_K(X)=\sum_{i=1}^{n}q_{Ki}L_i(X),\ q_T(X)=\sum_{i=m+1}^{n}L_i(X),
+\\
+S_{\sigma 1}(X)=\sum_{i=1}^{n}\sigma_{1i}L_i(X),\ S_{\sigma 2}(X)=\sum_{i=1}^{n}\sigma_{2i}L_i(X),\ S_{\sigma 3}(X)=\sum_{i=1}^{n}\sigma_{3i}L_i(X)
+$$
 
-![asp](./asp-workflow.jpeg)
+#### Public input
 
-The inclusion of data in the membership list is discretionary. This flexibility arises from situations where the data entry might simply be binary (YES/NO). In such cases, the smart contract accepts addresses marked as YES, allowing the omission of unnecessary data entries. However, programmability can be introduced when the sealed data holds additional meanings. For instance, an ASP might attest a user's FICO score and store the encrypted score in the smart contract. Subsequently, Dapps can devise more adaptable withdrawal conditions. For example, users with higher FICO scores may be eligible to withdraw a larger quantity of tokens, whereas those with lower FICO scores might have access to only a smaller amount. This introduces a higher degree of flexibility for designing diverse applications.
+$$
+\mathrm{PI}(X)=\sum_{i=1}^{l}w_iL_i(X)
+$$
+
+### 5.2 Proving Process
+
+#### Round 1
+
+- Generate randome blinding scalars $b_1,...,b_6$.
+- Compute the wire polynomials $a(X),b(X),c(X)\in \mathbb{F}_{<n+2}[x]$:
+
+$$
+\begin{aligned}
+a(X)&=(b_1(X)+b_2)Z_H(X)+\sum_{i=1}^{n}w_{Li}L_i(X)
+\\
+b(X)&=(b_3(X)+b_4)Z_H(X)+\sum_{i=1}^{n}w_{Ri}L_i(X)
+\\
+c(X)&=(b_5(X)+b_6)Z_H(X)+\sum_{i=1}^{n}w_{Oi}L_i(X)
+\end{aligned}
+$$
+
+- Compute $[a(x)]_1$, $[b(x)]_1$, $[c(x)]_1$. Append them into `transcript`.
+
+#### Round 2
+
+- Compute the table polynomial $t(X)\in \mathbb{F}_m[x]$:
+
+$$
+t(X)=\sum_{i=1}^{m}t_iL_i(X)
+$$
+
+- Let $\mathbf{s}\in \mathbb{F}^{2n}$ be the vector that is $(\mathbf{f},\mathbf{t})$ sorted by $\mathbf{t}$. We represents $s$ by the vectors $\mathbf{h_1},\mathbf{h_2}\in \mathbb{F}^n$ as follows:
+
+$$
+\begin{aligned}
+\mathbf{h_1}&=(s_1,s_3,...,s_{2n-1})
+\\
+\mathbf{h_2}&=(s_2,s_4,...,s_{2n})
+\end{aligned}
+$$
+
+- Generate random blinding scalars $b_{7},...,b_{11}$.
+
+- Compute the polynomials $h_1(X)\in \mathbb{F}_{<n+3}[x]$, and $h_2(X)\in \mathbb{F}_{<n+2}[x]$.
+
+$$
+\begin{aligned}
+h_1(X)&=(b_7X^2+b_8X+b_9)Z_H(X)+\sum_{i=1}^{n}s_{2i-1}L_i(X)
+\\
+h_2(X)&=(b_{10}X^2+b_{11}X)Z_H(X)+\sum_{i=1}^{n}s_{2i}L_i(X)
+\end{aligned}
+$$
+
+- Compute $[t(x)]_1$, $[h_1(x)]_1$, $[h_2(x)]_1$. Append them into `transcript`.
+
+#### Round 3
+
+- Compute the permutation challenges $\beta,\gamma,\delta,\varepsilon\in \mathbb{F}$:
+
+$$
+\beta=\mathrm{Hash(transcript \ | \ 1)}
+\\
+\gamma=\mathrm{Hash(transcript \ | \ 2)}
+\\
+\delta=\mathrm{Hash(transcript \ | \ 3)}
+\\
+\varepsilon=\mathrm{Hash(transcript \ | \ 4)}
+$$
+
+- Generate random blinding scalars $b_{12},...,b_{17}$.
+- Compute the Plonk permutation polynomial $z_1(X)\in \mathbb{F}_{<n+3}[x]$:
+
+$$
+\begin{aligned}
+z_1(X)=\ &(b_{12}X^2+b_{13}X+b_{14})Z_H(X)+L_1(X)
+\\
+&+\sum_{i=1}^{n-1}\left(L_{i+1}(X)\prod_{j=1}^i \frac{(w_{Lj}+\beta\omega^{j-1}+\gamma)(w_{Rj}+\beta k_1\omega^{j-1}+\gamma)(w_{Oj}+\beta k_2\omega^{j-1}+\gamma)}{(w_{Lj}+\beta\sigma_{1j}+\gamma)(w_{Rj}+\beta\sigma_{2j}+\gamma)(w_{Oj}+\beta\sigma_{3j}+\gamma)} \right)
+\end{aligned}
+$$
+
+- Compute the plookup permutation polynomial $z_2(X)\in \mathbb{F}_{<n+3}[x]$:
+
+$$
+\begin{aligned}
+z_2(X)=\ &(b_{15}X^2+b_{16}X+b_{17})Z_H(X)+L_1(X)
+\\
+&+\sum_{i=1}^{n-1}\left(L_{i+1}(X)\prod_{j=1}^{i}\frac{(1+\delta)(\varepsilon+q_{Kj}c_j)(\varepsilon(1+\delta)+t_j+\delta t_{j+1})}{(\varepsilon(1+\delta)+s_{2j-1}+\delta s_{2j})(\varepsilon(1+\delta)+s_{2j}+\delta s_{2j+1})}\right)
+\end{aligned}
+$$
+
+- Compute $[z_1(x)]_1$ and $[z_2(x)]_1$.
+
+#### Round 4
+
+- Compute the quotient challenge $\alpha\in \mathbb{F}$:
+
+$$
+\alpha=\mathrm{Hash(transcript)}
+$$
+
+- Compute the quotient polynomial $q(X)\in \mathbb{F}_{<3n+5}[x]$:
+
+$$
+q(X)=\frac{1}{Z_H(X)}
+\left(
+\begin{aligned}
+&\ a(X)b(X)q_M(X)+q(X)q_L(X)+b(X)q_R(X)+c(X)q_O(X)+q_C(X)+\mathrm{PI}(X)
+\\
+&+(a(X)+\beta X+\gamma)(b(X)+\beta k_1X+\gamma)(c(X)+\beta k_2X+\gamma)z_1(X)\alpha
+\\
+&-(a(X)+\beta S_{\sigma 1}(X)+\gamma)(b(X)+\beta S_{\sigma 2}(X)+\gamma)(c(X)+\beta S_{\sigma 3}(X)+\gamma)z_1(\omega X)\alpha
+\\
+&+(z_1(X)-1)L_1(X)\alpha^2
+\\
+&+z_2(X)(1+\delta)(\varepsilon+q_K(X)c(X))(\varepsilon(1+\delta)+t(X)+\delta t(\omega X))\alpha^3
+\\
+&-z_2(\omega X)(\varepsilon(1+\delta)+h_1(X)+\delta h_2(X))(\varepsilon(1+\delta)+h_2(X)+\delta h_1(\omega X))\alpha^3
+\\
+&+(z_2(X)-1)L_1(X)\alpha^4
+\\
+&+q_T(X)t(X)\alpha^5
+\end{aligned}
+\right.
+$$
+
+- Split $q(X)$ into 3 polynomials $q_{lo}(X)$, $q_{mid}(X)$, $q_{hi}(X)$ of degree at most $n+1$ such that:
+
+$$
+q(X)=q_{lo}(X) + X^{n+2}q_{mid}(X)+X^{2n+4}q_{hi}(X)
+$$
+
+- Compute $[q_{lo}(x)]_1$, $[q_{mid}(x)]_1$, $[q_{hi}(x)]_1$. Append them into `transcript`.
+
+#### Round 5
+
+- Compute the evaluation challenge $\xi\in \mathbb{F}$:
+
+$$
+\xi=\mathrm{Hash(transcript)}
+$$
+
+- Compute the opening evaluations and append them into `transcript`:
+
+$$
+a(\xi),b(\xi),c(\xi),S_{\sigma_1}(\xi),S_{\sigma_2}(\xi),q_K(\xi),t(\xi),t(\omega \xi),
+\\
+z_1(\omega \xi),z_2(\omega \xi),h_1(\omega \xi),h_2(\xi)
+$$
+
+#### Round 6
+
+- Compute the opening challenge $\eta\in \mathbb{F}$:
+
+$$
+\eta=\mathrm{Hash(transcript)}
+$$
+
+- Compute the linearization polynomial $r(X)\in \mathbb{F}_{<n+3}[x]$:
+
+$$
+\begin{aligned}
+r(X) =&\ a(\xi)b(\xi)q_M(X)+a(\xi)q_L(X)+b(\xi)q_R(X)+c(\xi)q_O(X)+PI(\xi)+q_C(X)
+\\
+&+\alpha[(a(\xi)+\beta\xi+\gamma)(b(\xi)+\beta k_1\xi+\gamma)(c(\xi)+\beta k_2\xi+\gamma)z_1(X)
+\\
+&-(a(\xi)+\beta S_{\sigma 1}(\xi) + \gamma)(b(\xi)+\beta S_{\sigma 2}(\xi)+\gamma)(c(\xi)+\beta S_{\sigma 3}(X)+\gamma)z_1(\omega \xi)]
+\\
+&+\alpha^2(z_1(X)-1)L_1(\xi)
+\\
+&+\alpha^3[z_2(X)(1+\delta)(\varepsilon+q_K(\xi)c(\xi))(\varepsilon(1+\delta)+t(\xi)+\delta t(\omega \xi))
+\\
+&-z_2(\omega \xi)(\varepsilon (1+\delta)+h_1(X)+\delta h_2(\xi))(\varepsilon (1+\delta)+h_2(\xi)+\delta h_1(\omega\xi))]
+\\
+&+\alpha^4(z_2(X)-1)L_1(\xi)
+\\
+&+\alpha^5q_T(X)t(\xi)
+\\
+&-Z_H(\xi)(q_{lo}(X)+\xi^{n+2}q_{mid}(X)+\xi^{2n+4}q_{hi}(X))
+\end{aligned}
+$$
+
+- Compute the opening proof polynomial $W_\xi(X) \in \mathbb{F}_{<n+2}[x]$
+
+$$
+W_{\xi}(X)=\frac{1}{X-\xi}
+\left(
+\begin{aligned}
+&\ r(X)
+\\
+&+\eta(a(X)-a(\xi))
+\\
+&+\eta^2(b(X)-b(\xi))
+\\
+&+\eta^3(c(X)-c(\xi))
+\\
+&+\eta^4(S_{\sigma 1}(X)-S_{\sigma 1}(\xi))
+\\
+&+\eta^5(S_{\sigma 2}(X)-S_{\sigma 2}(\xi))
+\\
+&+\eta^6(q_K(X)-q_K(\xi))
+\\
+&+\eta^7(h_2(X)-h_2(\xi))
+\\
+&+\eta^8(t(X)-t(\xi))
+\end{aligned}
+\right)
+$$
+
+- Compute the opening proof polynomial $W_{\omega\xi}(X)\in \mathbb{F}_{<n+2}[X]$:
+
+$$
+W_{\omega\xi}(X)=\frac{1}{X-\omega\xi}
+\left(
+\begin{aligned}
+&\ t(X)-t(\omega\xi)
+\\
+&+\eta(z_1(X)-z_1(\omega\xi))
+\\
+&+\eta^2(z_2(X)-z_2(\omega\xi))
+\\
+&+\eta^3(h_1(X)-h_1(\omega\xi))
+\end{aligned}
+\right)
+$$
+
+- Compute $[W_{\xi}(x)]_1$ and $[W_{\omega\xi}(x)]_1$.
+
+Finally, we have the complete proof:
+
+$$
+\pi=\left(
+\begin{matrix}
+[a(x)]_1,[b(x)]_1,[c(x)]_1,
+\\
+[t(x)]_1,[h_1(x)]_1,[h_2(x)]_1,[z_1(x)]_1,[z_2(x)]_1,
+\\
+[q_{lo}(x)]_1,[q_{mid}(x)]_1,[q_{hi}(x)]_1,[W_{\xi}(x)]_1,[W_{\omega\xi}(x)]_1,
+\\
+a(\xi),b(\xi),c(\xi),S_{\sigma 1}(\xi),S_{\sigma 2}(\xi),q_K(\xi),t(\xi),t(\omega\xi),
+\\
+z_1(\omega\xi),z_2(\omega\xi),h_1(\omega\xi),h_2(\xi)
+\end{matrix}
+\right)
+$$
+
+### 5.3 Verify Process
+
+- Validate all elements in $\pi$ are valid.
+- Validate $(w_i)_{i<l}$ are valid.
+- Compute all the challenges $\beta,\gamma,\delta,\varepsilon,\alpha,\xi,\eta$.
+- Compute the vanishing polynomial evaluation $Z_H(\xi)=\xi^n-1$.
+- Compute the first Lagrange polynomial evaluationn $L_1(\xi)=\frac{\xi^n-1}{n(\xi-1)}$
+- Compute the public input polynomial evaluation $\mathrm{PI}(\xi)=\sum_{i=1}^{l}w_iL_i(\xi)=\sum_{i=1}^{l}\frac{w_i(\xi^n-1)\omega^{i-1}}{n(\xi-\omega^{i-1})}$.
+- Compute the first evaluation $u$:
+
+$$
+\begin{aligned}
+u=&\ \mathrm{PI}(\xi)-\alpha(a(\xi)+\beta S_{\sigma 1}(\xi) + \gamma)(b(\xi)+\beta S_{\sigma 2}(\xi)+\gamma)(c(\xi)+\gamma)z_1(\omega\xi)-\alpha^2L_1(\xi)
+\\
+&-\alpha^3z_2(\omega \xi)(\varepsilon (1+\delta)+\delta h_2(\xi))(\varepsilon (1+\delta)+h_2(\xi)+\delta h_1(\omega\xi))-\alpha^4L_1(\xi)
+\\
+&-\eta a(\xi)-\eta^2 b(\xi)-\eta^3 c(\xi)-\eta^4 S_{\sigma 1}(\xi)-\eta^5 S_{\sigma 2}(\xi)-\eta^6 q_K(\xi)-\eta^7 h_2(\xi)-\eta^8 t(\xi)
+\end{aligned}
+$$
+
+- Compute the first polynomial commitment $[U]_1$:
+
+$$
+\begin{aligned}
+[U]_1=&\ a(\xi)b(\xi)[q_M(x)]_1+a(\xi)[q_L(x)]_1+b(\xi)[q_R(x)]_1+c(\xi)[q_O(x)]_1+[q_C(x)]_1
+\\
+&+(\alpha(a(\xi)+\beta\xi+\gamma)(b(\xi)+\beta k_1\xi+\gamma)(c(\xi)+\beta k_2\xi+\gamma)+\alpha^2L_1(\xi))[z_1(x)]_1
+\\
+&-\alpha\beta z_1(\omega \xi)(a(\xi)+\beta S_{\sigma 1}(\xi) + \gamma)(b(\xi)+\beta S_{\sigma 2}(\xi)+\gamma)[S_{\sigma 3}(x)]_1
+\\
+&+(\alpha^3(1+\delta)(\varepsilon+q_K(\xi)c(\xi))(\varepsilon(1+\delta)+t(\xi)+\delta t(\omega \xi))+\alpha^4L_1(\xi))[z_2(x)]_1
+\\
+&+\alpha^5t(\xi)[q_T(x)]_1-Z_H(\xi)\left([q_{lo}(x)]_1+\xi^{n+2}[q_{mid}(x)]_1+\xi^{2n+4}[q_{hi}(x)]_1\right)
+\\
+&+\eta[a(x)]_1+\eta^2[b(x)]_1+\eta^3[c(x)]_1+\eta^4[S_{\sigma 1}(x)]_1+\eta^5[S_{\sigma 2}(x)]_1
+\\
+&+\eta^6[q_K(x)]_1+\eta^7[h_2(x)]_1+\eta^8[t(x)]_1
+\end{aligned}
+$$
+
+- Compute the second evaluation $v$:
+
+$$
+v=-t(\omega\xi)-\eta z_1(\omega\xi)-\eta^2z_2(\omega\xi)-\eta^3h_1(\omega\xi)
+$$
+
+- Compute the second polynomial commitment $[V]_1$:
+
+$$
+[V]_1=[t(x)]_1+\eta[z_1(x)]_1+\eta^2[z_2(x)]_1+\eta^3[h_1(x)]_1
+$$
+
+- Verify 2 KZG opening proof by pairing engine $e([\bullet]_1,[\bullet]_2)$:
+
+$$
+\begin{aligned}
+e([W_{\xi}(x)]_1,[x]_2)&\overset{?}{=}e([U]_1+u\cdot[1]_1+\xi\cdot[W_{\xi}(x)]_1,[1]_2)
+\\
+e([W_{\omega\xi}(x)]_1,[x]_2)&\overset{?}{=}e([V]_1+v\cdot[1]_1+\omega\xi\cdot[W_{\omega\xi}(x)]_1,[1]_2)
+\end{aligned}
+$$
+
+- Verify $m$ KZG opening proof at each identifier $t_i$ by pairing engine $e([\bullet]_1,[\bullet]_2)$, where $1 \leq i \leq m$:
+
+$$
+e([f_i(x)]_1,[x]_2)\overset{?}{=}e([t(x)]_1-t_i\cdot[1]_1+\omega^{i-1}\cdot[f_i(x)]_1,[1]_2)
+$$
+
+## 6. ASP Part @Xxiang
 
 
-
-## 6. Client-Side Acceleration Solution
+## 7. Client-Side Acceleration Solution
 
 In our quest to enhance user experience and efficiency in the Vala system, we've focused on client-side computational optimization. This optimization is crucial for reducing the computational burden on user devices and accelerating transaction and verification processes.
 
-### 6.1 WebAssembly Integration
+### 7.1 WebAssembly Integration
 Our integration of WebAssembly (Wasm) allows for the execution of complex cryptographic proof generation processes directly in the user's browser. By compiling our Rust code into WebAssembly, we've significantly reduced dependency on centralized servers and improved system responsiveness and efficiency.
 
-### 6.2 Local Computation Optimization
-#### 6.2.1 Transaction Decision Logic
+### 7.2 Local Computation Optimization
+#### 7.2.1 Transaction Decision Logic
 
 In our UTXO model, each user's funds are represented as encrypted NOTES, each corresponding to a specific amount of assets (e.g., ETH). Our system intelligently selects the appropriate combination of NOTES to fulfill withdrawal requests. For instance, if a user has NOTES of 1 ETH, 1 ETH, 2 ETH, and 3 ETH and wishes to withdraw 2.5 ETH, our system automatically utilizes the 1 ETH, 1 ETH, and 2 ETH NOTES.
 
-#### 6.2.2 Generation of New Deposit Proofs
+#### 7.2.2 Generation of New Deposit Proofs
 
 Following the utilization of certain NOTES for transactions, our system generates new deposit proofs corresponding to the remaining amount. Continuing the previous example, after spending the 1 ETH, 1 ETH, and 2 ETH NOTES, a new deposit proof for 1.5 ETH is created, ensuring secure and effective management of funds post-transaction.
 
-#### 6.2.3 Implementation in Chrome Plugin and iOS App
+#### 7.2.3 Implementation in Chrome Plugin and iOS App
 
 To achieve this computational optimization, we've implemented tailored strategies in our Chrome plugin and iOS app. The Chrome plugin optimizes the NOTE selection and new proof generation process, leveraging the browser's processing capabilities. In contrast, our iOS app employs multi-threading technology to accelerate these computations, taking full advantage of the high-performance capabilities of iOS devices.
 
-### 6.3 Caching Strategies
+### 7.3 Caching Strategies
 We have implemented caching strategies to reduce redundant computations and network requests. Key data, such as parts of the Merkle Tree, are cached on the user device for quick retrieval in subsequent transactions or verifications, reducing network traffic and significantly enhancing overall system performance.
 
-### 6.4 User Experience Enhancement
+### 7.4 User Experience Enhancement
 Lastly, we place a high emphasis on enhancing the user experience. This involves not only technical optimizations but also improvements in interface design. We ensure that the user interface is intuitive and the transaction process is seamless. Real-time feedback and detailed error messages enhance user trust and satisfaction.
 
 In summary, our client-side acceleration solution is a key strategy for enhancing the performance of the Vala system. Through these technological and methodological applications, we not only enhance the speed and efficiency of transactions but also optimize the user experience, making Vala a more powerful and user-friendly blockchain privacy platform.
 
-## 7. Summary
+## 8. Summary
 
 This paper thoroughly explores the approaches and practices for achieving a balance between privacy protection and regulatory compliance in blockchain technology. By incorporating innovative applications of honest address sets, zk-credit, and membership proof, we demonstrate how to maintain user privacy while adhering to regulatory standards. The focus extends beyond the technical and system architecture to include engineering practices and enhancements in user experience performance. Our aim is to establish a secure, efficient blockchain system that delivers an exceptional user experience. Representing a step forward, this second-generation privacy transaction protocol signifies a better tomorrow, where privacy is not just a feature – it's the norm.
 
