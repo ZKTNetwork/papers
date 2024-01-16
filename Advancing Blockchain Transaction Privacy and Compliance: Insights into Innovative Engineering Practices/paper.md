@@ -167,7 +167,7 @@ $$
 #### Round 1
 
 - Generate randome blinding scalars $b_1,...,b_6$.
-- Compute the wire polynomials $a(X),b(X),c(X)\in \mathbb{F}_{<n+2}[x]$:
+- Compute the wire polynomials $a(X),b(X),c(X)\in \mathbb{F}_{\lt n+2}[x]$:
 
 $$
 \begin{aligned}
@@ -201,7 +201,7 @@ $$
 
 - Generate random blinding scalars $b_{7},...,b_{11}$.
 
-- Compute the polynomials $h_1(X)\in \mathbb{F}_{<n+3}[x]$, and $h_2(X)\in \mathbb{F}_{<n+2}[x]$.
+- Compute the polynomials $h_1(X)\in \mathbb{F}_{\lt n+3}[x]$, and $h_2(X)\in \mathbb{F}_{\lt n+2}[x]$.
 
 $$
 \begin{aligned}
@@ -228,7 +228,7 @@ $$
 $$
 
 - Generate random blinding scalars $b_{12},...,b_{17}$.
-- Compute the Plonk permutation polynomial $z_1(X)\in \mathbb{F}_{<n+3}[x]$:
+- Compute the Plonk permutation polynomial $z_1(X)\in \mathbb{F}_{\lt n+3}[x]$:
 
 $$
 \begin{aligned}
@@ -238,7 +238,7 @@ z_1(X)=\ &(b_{12}X^2+b_{13}X+b_{14})Z_H(X)+L_1(X)
 \end{aligned}
 $$
 
-- Compute the plookup permutation polynomial $z_2(X)\in \mathbb{F}_{<n+3}[x]$:
+- Compute the plookup permutation polynomial $z_2(X)\in \mathbb{F}_{\lt n+3}[x]$:
 
 $$
 \begin{aligned}
@@ -258,7 +258,7 @@ $$
 \alpha=\mathrm{Hash(transcript)}
 $$
 
-- Compute the quotient polynomial $q(X)\in \mathbb{F}_{<3n+5}[x]$:
+- Compute the quotient polynomial $q(X)\in \mathbb{F}_{\lt 3n+5}[x]$:
 
 $$
 q(X)=\frac{1}{Z_H(X)}
@@ -315,7 +315,7 @@ $$
 \eta=\mathrm{Hash(transcript)}
 $$
 
-- Compute the linearization polynomial $r(X)\in \mathbb{F}_{<n+3}[x]$:
+- Compute the linearization polynomial $r(X)\in \mathbb{F}_{\lt n+3}[x]$:
 
 $$
 \begin{aligned}
@@ -339,7 +339,7 @@ r(X) =&\ a(\xi)b(\xi)q_M(X)+a(\xi)q_L(X)+b(\xi)q_R(X)+c(\xi)q_O(X)+PI(\xi)+q_C(X
 \end{aligned}
 $$
 
-- Compute the opening proof polynomial $W_\xi(X) \in \mathbb{F}_{<n+2}[x]$
+- Compute the opening proof polynomial $W_\xi(X) \in \mathbb{F}_{\lt n+2}[x]$
 
 $$
 W_{\xi}(X)=\frac{1}{X-\xi}
@@ -366,7 +366,7 @@ W_{\xi}(X)=\frac{1}{X-\xi}
 \right)
 $$
 
-- Compute the opening proof polynomial $W_{\omega\xi}(X)\in \mathbb{F}_{<n+2}[X]$:
+- Compute the opening proof polynomial $W_{\omega\xi}(X)\in \mathbb{F}_{\lt n+2}[X]$:
 
 $$
 W_{\omega\xi}(X)=\frac{1}{X-\omega\xi}
@@ -406,7 +406,7 @@ $$
 ### 5.3 Verify Process
 
 - Validate all elements in $\pi$ are valid.
-- Validate $(w_i)_{i<l}$ are valid.
+- Validate $(w_i)_{i\lt l}$ are valid.
 - Compute all the challenges $\beta,\gamma,\delta,\varepsilon,\alpha,\xi,\eta$.
 - Compute the vanishing polynomial evaluation $Z_H(\xi)=\xi^n-1$.
 - Compute the first Lagrange polynomial evaluationn $L_1(\xi)=\frac{\xi^n-1}{n(\xi-1)}$
