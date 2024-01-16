@@ -6,7 +6,7 @@ Authors: Lone(ZKT), Taiyo(ZKT), Xie. X(PADO Labs)
 
 Blockchain privacy and regulatory compliance are experiencing a dynamic shift, significantly inspired by the pivotal works of Vitalik Buterin and [Ameen Soleimani](https://ethresear.ch/u/ameensol). Their insightful paper, "[Blockchain Privacy and Regulatory Compliance: Towards a Practical Equilibrium](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=4563364)[^1]," along with the enlightening [forum post](https://ethresear.ch/t/permissioned-privacy-pools/13572) on permissioned privacy pools, has laid a foundational framework for understanding the intricate balance between maintaining transactional privacy and adhering to regulatory norms. These resources delve deeply into the challenges and viable solutions for synchronizing privacy with compliance in the ever-evolving blockchain landscape.
 
-A key takeaway from their works is the concept of 'honest address sets' which profoundly influences our approach to achieving a second-generation privacy protocol. In this framework, Associate Set Providers (ASPs) emerge as crucial facilitators of credit within the zk-credit system, offering a structured approach to assess and attest to the creditworthiness of users. Meanwhile, membership proof ensures that all participants in a transaction are part of an honest address set, enhancing the security of our protocol and providing a safer, more trustworthy environment for users.
+A key takeaway from their works is the concept of 'honest address sets' which profoundly influences our approach to achieving a second-generation privacy protocol. In this framework, Association Set Providers (ASPs) emerge as crucial facilitators of credit within the zk-credit system, offering a structured approach to assess and attest to the creditworthiness of users. Meanwhile, membership proof ensures that all participants in a transaction are part of an honest address set, enhancing the security of our protocol and providing a safer, more trustworthy environment for users.
 
 In summary, the works of Buterin and Soleimani have been instrumental in guiding our approach to developing a blockchain system that upholds both privacy and regulatory compliance. By integrating these concepts into our system, we have been able to create a more secure, efficient, and privacy-preserving second-generation protocol.
 
@@ -139,10 +139,6 @@ During the verification phase, besides the zk-SNARK proof verification, we  can 
 
 **Note**:
 We can construct an aggregated opening proof, which is called a multi-point opening, and use only one elliptic curve pairing operation.
-
-### 4.3.4 Performance Comparision
-
-TODO
 
 ## 5. ZKT Protocol
 
@@ -475,9 +471,9 @@ $$
 e([f_i(x)]_1,[x]_2)\overset{?}{=}e([t(x)]_1-t_i\cdot[1]_1+\omega^{i-1}\cdot[f_i(x)]_1,[1]_2)
 $$
 
-## 6. Associate Set Provider
+## 6. Association Set Provider
 
-The Associate Set Provider (ASP) mechanism allows a third party to oversee the membership list. Similar to an attestor, an ASP offers attestation services for end-users. The associated address, along with potential attested and sealed data, is submitted to a designated ASP smart contract. In Vala, any entity can register as an ASP. The selection of which ASP to utilize depends on the choices made by end-users and Dapps.
+The Association Set Provider (ASP) mechanism allows a third party to oversee the membership list. Similar to an attestor, an ASP offers attestation services for end-users. The associated address, along with potential attested and sealed data, is submitted to a designated ASP smart contract. In Vala, any entity can register as an ASP. The selection of which ASP to utilize depends on the choices made by end-users and Dapps.
 
 The data category can be defined by the ASP, allowing support for a diverse range of potential data from web2, such as credit scores, KYC results, etc. For attesting any data obtained through the standard Transport Layer Security (TLS) protocol (e.g, HTTPS) and to accommodate a large volume of potential data, we recommend employing MPC-TLS style algorithms within the ASP. This approach, initially introduced by DECO and significantly improved by PADO, is detailed further in this paper[https://eprint.iacr.org/2023/964.pdf](https://eprint.iacr.org/2023/964.pdf) [^4]. Within this framework, users can prove to the attestor that the data indeed originates from the intended sources without leaking any other information.
 
