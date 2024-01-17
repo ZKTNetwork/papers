@@ -148,7 +148,7 @@ We now describe a protocol that referred to Plonkup[^3] which is customized for 
 
 $$
 \begin{matrix}
-n,\ [1]\_1,[x]\_1,...,[x^{n+5}]\_1,[1]\_2,[x]\_2,
+n,\ [1]_1,[x]_1,...,[x^{n+5}]_1,[1]_2,[x]_2,
 \\
 q_L(X)=\sum_{i=1}^{n}q_{Li}L_i(X),\ q_R(X)=\sum_{i=1}^{n}q_{Ri}L_i(X),\ q_O(X)=\sum_{i=1}^{n}q_{Li}L_i(X),
 \\
@@ -429,19 +429,19 @@ $$
 
 $$
 \begin{aligned}
-[U][U]\_1=&\ a(\xi)b(\xi)[q\_M(x)]\_1+a(\xi)[q\_L(x)]\_1+b(\xi)[q\_R(x)]\_1+c(\xi)[q\_O(x)]\_1+[q\_C(x)]\_1
+[U][U]_1=&\ a(\xi)b(\xi)[q\_M(x)]_1+a(\xi)[q\_L(x)]_1+b(\xi)[q\_R(x)]_1+c(\xi)[q\_O(x)]_1+[q\_C(x)]_1
 \\
-&+(\alpha(a(\xi)+\beta\xi+\gamma)(b(\xi)+\beta k_1\xi+\gamma)(c(\xi)+\beta k_2\xi+\gamma)+\alpha^2L_1(\xi))[z\_1(x)]\_1
+&+(\alpha(a(\xi)+\beta\xi+\gamma)(b(\xi)+\beta k_1\xi+\gamma)(c(\xi)+\beta k_2\xi+\gamma)+\alpha^2L_1(\xi))[z\_1(x)]_1
 \\
-&-\alpha\beta z_1(\omega \xi)(a(\xi)+\beta S_{\sigma 1}(\xi) + \gamma)(b(\xi)+\beta S_{\sigma 2}(\xi)+\gamma)[S\_{\sigma\ 3}(x)]\_1
+&-\alpha\beta z_1(\omega \xi)(a(\xi)+\beta S_{\sigma 1}(\xi) + \gamma)(b(\xi)+\beta S_{\sigma 2}(\xi)+\gamma)[S\_{\sigma\ 3}(x)]_1
 \\
-&+(\alpha^3(1+\delta)(\varepsilon+q_K(\xi)c(\xi))(\varepsilon(1+\delta)+t(\xi)+\delta t(\omega \xi))+\alpha^4L_1(\xi))[z\_2(x)]\_1
+&+(\alpha^3(1+\delta)(\varepsilon+q_K(\xi)c(\xi))(\varepsilon(1+\delta)+t(\xi)+\delta t(\omega \xi))+\alpha^4L_1(\xi))[z\_2(x)]_1
 \\
-&+\alpha^5t(\xi)[q_T(x)]\_1-Z_H(\xi)\left([q_{lo}(x)]\_1+\xi^{n+2}[q\_{mid}(x)]\_1+\xi^{2n+4}[q\_{hi}(x)]\_1\right)
+&+\alpha^5t(\xi)[q_T(x)]_1-Z_H(\xi)\left([q_{lo}(x)]_1+\xi^{n+2}[q\_{mid}(x)]_1+\xi^{2n+4}[q\_{hi}(x)]_1\right)
 \\
-&+\eta[a(x)]\_1+\eta^2[b(x)]_1+\eta^3[c(x)]\_1+\eta^4[S\_{\sigma 1}(x)]\_1+\eta^5[S\_{\sigma 2}(x)]\_1
+&+\eta[a(x)]_1+\eta^2[b(x)]_1+\eta^3[c(x)]_1+\eta^4[S\_{\sigma 1}(x)]_1+\eta^5[S\_{\sigma 2}(x)]_1
 \\
-&+\eta^6[q_K(x)]\_1+\eta^7[h\_2(x)]\_1+\eta^8[t(x)]\_1
+&+\eta^6[q_K(x)]_1+\eta^7[h\_2(x)]_1+\eta^8[t(x)]_1
 \end{aligned}
 $$
 
@@ -461,9 +461,9 @@ $$
 
 $$
 \begin{aligned}
-e([W_{\xi}(x)]\_1,[x]\_2)&\overset{?}{=}e([U]\_1+u\cdot[1]\_1+\xi\cdot[W_{\xi}(x)]\_1,[1]\_2)
+e([W_{\xi}(x)]_1,[x]_2)&\overset{?}{=}e([U]_1+u\cdot[1]_1+\xi\cdot[W_{\xi}(x)]_1,[1]_2)
 \\
-e([W_{\omega\xi}(x)]\_1,[x]\_2)&\overset{?}{=}e([V]\_1+v\cdot[1]\_1+\omega\xi\cdot[W_{\omega\xi}(x)]\_1,[1]\_2)
+e([W_{\omega\xi}(x)]_1,[x]_2)&\overset{?}{=}e([V]_1+v\cdot[1]_1+\omega\xi\cdot[W_{\omega\xi}(x)]_1,[1]_2)
 \end{aligned}
 $$
 
@@ -513,7 +513,16 @@ Lastly, we place a high emphasis on enhancing the user experience. This involves
 
 In summary, our client-side acceleration solution is a key strategy for enhancing the performance of the Vala system. Through these technological and methodological applications, we not only enhance the speed and efficiency of transactions but also optimize the user experience, making Vala a more powerful and user-friendly blockchain privacy platform.
 
-## 8. Summary
+## 8. what does it mean？
+At ZKT Network, we're dedicated to realizing a grand vision: leading a technological revolution by balancing blockchain transaction privacy with global compliance standards. Our innovation extends beyond technical realms, exploring new frontiers in the balance of privacy and compliance.
+
+Therefore, we warmly invite researchers and experts in the blockchain field to participate in our project, offering feedback and suggestions to advance this sector. ZKT Network looks forward to your professional insights and collaboration to develop a more comprehensive and effective blockchain privacy solution.
+
+We also encourage community members to explore innovative applications based on our framework, as per their requirements. ZKT Network is eager to imagine the future with you, face challenges together, and build a more secure, compliant, and innovative blockchain world.
+
+At ZKT Network, we believe that through collective wisdom and collaborative effort, we can achieve a perfect integration of privacy protection and compliance, creating a future filled with possibilities.
+
+## 9. Summary
 
 This paper thoroughly explores the approaches and practices for achieving a balance between privacy protection and regulatory compliance in blockchain technology. By incorporating innovative applications of honest address sets, zk-credit, and membership proof, we demonstrate how to maintain user privacy while adhering to regulatory standards. The focus extends beyond the technical and system architecture to include engineering practices and enhancements in user experience performance. Our aim is to establish a secure, efficient blockchain system that delivers an exceptional user experience. Representing a step forward, this second-generation privacy transaction protocol signifies a better tomorrow, where privacy is not just a feature – it's the norm.
 
