@@ -22,12 +22,11 @@ Central to Vala's architecture is the Privacy Pool, a sophisticated mechanism th
 
 The technology stack for ZKT Vala is anchored by zkSNARK for privacy preservation. The UTXO Proof uses a Merkle Tree structure, while Membership Proof employs Plonk + Plookup[^2] for enhanced search speed. The project's zero-knowledge proofs part is implemented in Rust, optimizing performance and security. For the frontend, proof generation utilizes WebAssembly compiled from our Rust code, significantly accelerating the proof generation process for users. This stack represents a blend of advanced cryptographic techniques and efficient programming solutions, tailored for robust and fast privacy transactions.
 
-
 ## 4. Component Details
 
 ### 4.1 Infrastructure
 
-The users' fungible assets are hashed into a Binary Merkle Tree. The leaf node is initialized with a constant value $H'=\mathrm{Hash}(0)$ until any asset occupies the slot of the leaf, then the leaf node should be updated to $H=\mathrm{Hash}(identifier \ | \ amount \ | \ commitment)$, where $identifier$ is an associated tag of this asset (like the user's address), $amount$ is the quantity of the asset stored at the leaf node, and $commitment = \mathrm{Hash}(secret)$, with $secret$ being the key of the user who owns the asset.
+The users' fungible assets are hashed into a Binary Merkle Tree. The leaf node is initialized with a constant value $H'=\mathrm{Hash}(0)$ until any asset occupies the slot of the leaf, then the leaf node should be updated to $H=\mathrm{Hash}(identifier \ | \ amount \ | \ commitment)$, where $identifier$ is an associated tag of this asset (e.g. the user's address), $amount$ is the quantity of the asset stored at the leaf node, and $commitment = \mathrm{Hash}(secret)$, with $secret$ being the key of the user who owns the asset.
 
 For an unused leaf node slot, the user can deposit an asset into the pool and take the slot while providing the asset and commitment. For withdrawal, the user should provide the withdrawal amount, new leaf hash, and the snark proof.
 
@@ -99,7 +98,7 @@ In our UTXO model, each user's funds are represented as multiple encrypted ULOs,
 
 In summary, Plookup provides significant benefits in our membership proof system, especially in managing numerous ULOs within the UTXO model. This approach not only reduces computational burden but also enhances the overall system efficiency and performance.
 
-#### 4.3.3 Plookup introduce
+#### 4.3.3 Plookup embedding
 
 Assuming the user provides an identifier list of size $m$ from the source ULOs, denoted as $\mathbf{t}$, then we pad the set $\mathbf{t}$ with 0 until it satisfies the size of circuit size $n$.
 
@@ -107,22 +106,7 @@ $$
 \mathbf{t}=\{\mathrm{id}_0,\mathrm{id}_1,...,0,...,0\}
 $$
 
-Let $\mathbf{f}$ be the query table:
-
-$$
-f_i = q_{Ki} \cdot c_i =
-\left\{
-\begin{matrix}
-c_i, &\ \mathrm{if \ the} \ i\mathrm{\ gate \ is \ a \ lookup \ gate}
-\\
-0, &\ \mathrm{otherwise}
-\end{matrix}
-\right.
-$$
-
-Where $c_i$ is the output witness defined in arithmetic gate of Plonk, we activate it when $c_i$ represents the identifier witness. $q_{Ki} \in \{0,1\}$ is the selector that switches on/off the lookup gate.
-
-Furthermore, we define $\mathbf{q_T}$ to satisfy $q_{Ti}\cdot t_i = 0$:
+Furthermore, we define $\mathbf{q_T}$, which satisfy $q_{Ti}\cdot t_i = 0$:
 
 $$
 q_{Ti}=
@@ -135,10 +119,35 @@ q_{Ti}=
 \right.
 $$
 
-During the verification phase, besides the zk-SNARK proof verification, we  can verify the opening proof of $\mathbf{t}$ at $\{1, \omega, \omega^2, ..., \omega^{m-1}\}$ to confirm the correctness of each identifier in $\mathbf{t}$, without any hash operations.
+Let $\mathbf{f}$ be the query table:
 
-**Note**:
-We can construct an aggregated opening proof, which is called a multi-point opening, and use only one elliptic curve pairing operation.
+$$
+f_i = q_{Ki}\cdot c_i=
+\left\{
+\begin{matrix}
+c_i, &\ \mathrm{if \ the} \ i\mathrm{\ gate \ is \ a \ lookup \ gate}
+\\
+0, &\ \mathrm{otherwise}
+\end{matrix}
+\right.
+$$
+
+$$
+q_{Ki}=
+\left\{
+\begin{matrix}
+1, &\ \mathrm{if \ the} \ i\mathrm{\ gate \ is \ a \ lookup \ gate}
+\\
+0, &\ \mathrm{otherwise}
+\end{matrix}
+\right.
+$$
+
+Where $c_i$ is the output witness defined in arithmetic gate of Plonk, we activate it when $c_i$ represents the identifier witness. $q_{Ki}$ is the selector that switches on/off the lookup gate.
+
+Then we just need to prove all elements of $\mathbf{f}$ exist in $\mathbf{t}$ with Plookup protocol.
+
+During the verification phase, besides the zk-SNARK proof verification, we also verify the opening proof of $\mathbf{t}$ at $\{1, \omega, \omega^2, ..., \omega^{m-1}\}$ to confirm the correctness of each identifier in $\mathbf{t}$, without any hash operations.
 
 ## 5. ZKT Protocol
 
