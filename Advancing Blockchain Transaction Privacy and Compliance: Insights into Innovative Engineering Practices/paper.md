@@ -157,7 +157,7 @@ We now describe a protocol that referred to Plonkup[^3] which is customized for 
 
 $$
 \begin{matrix}
-n,\ [1]_1,[x]_1,...,[x^{n+5}]_1,[1]_2,[x]_2,
+n,\ [1]_1,[x]_1,...,[x^{n+5}]_1,[1]_2,[x]_2,\ q_M(X)=\sum_{i=1}^{n}q_{Mi}L_i(X)
 \\
 q_L(X)=\sum_{i=1}^{n}q_{Li}L_i(X),\ q_R(X)=\sum_{i=1}^{n}q_{Ri}L_i(X),\ q_O(X)=\sum_{i=1}^{n}q_{Li}L_i(X),
 \\
@@ -438,19 +438,21 @@ $$
 
 $$
 \begin{aligned}
-[U][U]_1=&\ a(\xi)b(\xi)[q\_M(x)]_1+a(\xi)[q\_L(x)]_1+b(\xi)[q\_R(x)]_1+c(\xi)[q\_O(x)]_1+[q\_C(x)]_1
+[U]_1=&\ a(\xi)b(\xi)[q_M(x)]_1+a(\xi)[q_L(x)]_1+b(\xi)[q_R(x)]_1+c(\xi)[q_O(x)]_1+[q_C(x)]_1
 \\
-&+(\alpha(a(\xi)+\beta\xi+\gamma)(b(\xi)+\beta k_1\xi+\gamma)(c(\xi)+\beta k_2\xi+\gamma)+\alpha^2L_1(\xi))[z\_1(x)]_1
+&+(\alpha(a(\xi)+\beta\xi+\gamma)(b(\xi)+\beta k_1\xi+\gamma)(c(\xi)+\beta k_2\xi+\gamma)+\alpha^2L_1(\xi))[z_1(x)]_1
 \\
-&-\alpha\beta z_1(\omega \xi)(a(\xi)+\beta S_{\sigma 1}(\xi) + \gamma)(b(\xi)+\beta S_{\sigma 2}(\xi)+\gamma)[S\_{\sigma\ 3}(x)]_1
+&-\alpha\beta z_1(\omega \xi)(a(\xi)+\beta S_{\sigma 1}(\xi) + \gamma)(b(\xi)+\beta S_{\sigma 2}(\xi)+\gamma)[S_{\sigma\ 3}(x)]_1
 \\
-&+(\alpha^3(1+\delta)(\varepsilon+q_K(\xi)c(\xi))(\varepsilon(1+\delta)+t(\xi)+\delta t(\omega \xi))+\alpha^4L_1(\xi))[z\_2(x)]_1
+&+(\alpha^3(1+\delta)(\varepsilon+q_K(\xi)c(\xi))(\varepsilon(1+\delta)+t(\xi)+\delta t(\omega \xi))+\alpha^4L_1(\xi))[z_2(x)]_1
 \\
-&+\alpha^5t(\xi)[q_T(x)]_1-Z_H(\xi)\left([q_{lo}(x)]_1+\xi^{n+2}[q\_{mid}(x)]_1+\xi^{2n+4}[q\_{hi}(x)]_1\right)
+&+\alpha^3 z_2(\omega\xi)(\varepsilon(1+\delta)+h_2(\xi)+\delta h_1(\omega\xi))[h_1(x)]_1
 \\
-&+\eta[a(x)]_1+\eta^2[b(x)]_1+\eta^3[c(x)]_1+\eta^4[S\_{\sigma 1}(x)]_1+\eta^5[S\_{\sigma 2}(x)]_1
+&+\alpha^5t(\xi)[q_T(x)]_1-Z_H(\xi)\left([q_{lo}(x)]_1+\xi^{n+2}[q_{mid}(x)]_1+\xi^{2n+4}[q_{hi}(x)]_1\right)
 \\
-&+\eta^6[q_K(x)]_1+\eta^7[h\_2(x)]_1+\eta^8[t(x)]_1
+&+\eta[a(x)]_1+\eta^2[b(x)]_1+\eta^3[c(x)]_1+\eta^4[S_{\sigma 1}(x)]_1+\eta^5[S_{\sigma 2}(x)]_1
+\\
+&+\eta^6[q_K(x)]_1+\eta^7[h_2(x)]_1+\eta^8[t(x)]_1
 \end{aligned}
 $$
 
